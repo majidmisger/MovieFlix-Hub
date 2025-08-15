@@ -12,7 +12,7 @@ const {
 } = require('../utils/utils');
 
 exports.searchMovies = async (req, res) => {
-  const { search, sort, filter } = req.query;
+  const { search, sort, filter, page = 1 } = req.query;
 
   try {
 
@@ -33,23 +33,27 @@ exports.searchMovies = async (req, res) => {
     }
 
     // find movies in the database that match the query
-    let movies = await Movie.find(query);
+    let mongoMovies = await Movie.find(query);
 
-    // if movies are found, sort them based on the sort option
-    if (movies.length > 0) {
-      return res.json(sortMovies(movies, sort));
+    // If first page & we have data in DB → just return it
+    if (mongoMovies.length > 0 && Number(page) === 1) {
+      return res.json(sortMovies(mongoMovies, sort));
     }
 
-    // if movies are not found in the database, fetch them from TMDB
-    movies = await fetchAndTransformMoviesFromTMDB(search, filter);
+    // Otherwise → fetch from TMDB for the requested page
+    const tmdbMovies = await fetchAndTransformMoviesFromTMDB(search, filter, page);
 
-    // if movies are fetched from TMDB, cache them in the database
-    if (movies.length > 0) {
-      await cacheMovies(movies);
+    // Cache newly fetched movies
+    if (tmdbMovies.length > 0) {
+      await cacheMovies(tmdbMovies);
     }
 
-    // return the sorted movies
-    res.json(sortMovies(movies, sort));
+    // Combine DB + newly fetched for FE (avoid duplicates by tmdbId)
+    const allMovies = [...mongoMovies, ...tmdbMovies].filter(
+      (movie, index, self) =>
+        index === self.findIndex((m) => m.tmdbId === movie.tmdbId)
+    );
+    res.json(sortMovies(allMovies, sort));
   } catch (error) {
     console.log("🚀 ~ error:", error)
     res.status(500).json({ message: 'Server error', details: error.message });

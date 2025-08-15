@@ -1,43 +1,66 @@
 // src/components/MainDashboard.js
 import React, { useState, useEffect } from 'react';
-import { Container, Form, Row, Col, Card, Image } from 'react-bootstrap';
+import { Container, Form, Row, Col, Card, Image, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { searchMovies } from '../helperFunctions/helperFunctions';
 
 function MainDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredMovies, setFilteredMovies] = useState([]);
+  const [movies, setMovies] = useState([]);
   const [sortOption, setSortOption] = useState('');
   const [genreOption, setGenreOption] = useState('');
+  const [page, setPage] = useState(1); // For pagination when no search
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true); // Tracks if more pages are available
 
   // Fetch all movies on page load
   useEffect(() => {
-    const fetchAllMovies = async () => {
-      const results = await searchMovies('', sortOption, genreOption);
-      setFilteredMovies(results);
-    };
-    fetchAllMovies();
+    fetchMovies(1, true);
   }, []);
 
+ const fetchMovies = async (pageNum, reset = false) => {
+  setLoading(true);
+  const results = await searchMovies(searchTerm, sortOption, genreOption, pageNum);
+
+  setMovies(prev => {
+    const combined = reset ? results : [...prev, ...results];
+    const seen = new Set();
+    return combined.filter(movie => {
+      if (seen.has(movie.tmdbId)) return false;
+      seen.add(movie.tmdbId);
+      return true;
+    });
+  });
+
+  setHasMore(results.length > 0); // Show "See More" only if results returned
+  setLoading(false);
+};
+;
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    const results = await searchMovies(searchTerm, sortOption, genreOption);
-    setFilteredMovies(results);
+    setPage(1);
+    fetchMovies(1, true);
   };
 
   const handleSort = async (e) => {
     const option = e.target.value;
     setSortOption(option);
-    const results = await searchMovies(searchTerm, option, genreOption);
-    setFilteredMovies(results);
+    setPage(1);
+    fetchMovies(1, true);
   };
 
   const handleGenreChange = async (e) => {
     const genre = e.target.value;
     setGenreOption(genre);
-    const results = await searchMovies(searchTerm, sortOption, genre);
-    setFilteredMovies(results);
+    setPage(1);
+    fetchMovies(1, true);
+  };
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchMovies(nextPage, false);
   };
 
   return (
@@ -51,12 +74,7 @@ function MainDashboard() {
         <Form.Control
           type="search"
           placeholder="Search for a movie..."
-          style={{
-            maxWidth: '600px',
-            height: '50px',
-            fontSize: '18px',
-            padding: '10px',
-          }}
+          style={{ maxWidth: '600px', height: '50px', fontSize: '18px', padding: '10px' }}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -70,7 +88,7 @@ function MainDashboard() {
       </Form>
 
       {/* Sorting & Genre Filter */}
-      {filteredMovies.length > 0 && (
+      {movies.length > 0 && (
         <div className="d-flex justify-content-end mb-3" style={{ gap: '10px' }}>
           <Form.Select
             value={sortOption}
@@ -104,7 +122,7 @@ function MainDashboard() {
 
       {/* Movie List */}
       <Row>
-        {filteredMovies.map((movie) => (
+        {movies.map((movie) => (
           <Col key={movie.tmdbId} xs={12} sm={6} md={4} lg={3} className="mb-4">
             <Link
               to={`/movie/${movie.tmdbId}`}
@@ -139,8 +157,21 @@ function MainDashboard() {
         ))}
       </Row>
 
-      {/* No results message */}
-      {searchTerm && filteredMovies.length === 0 && (
+      {/* See More Button - Only if no search term */}
+      {!searchTerm && hasMore && (
+        <div className="text-center mt-4">
+          <Button
+            variant="secondary"
+            onClick={handleLoadMore}
+            disabled={loading}
+          >
+            {loading ? 'Loading...' : 'See More'}
+          </Button>
+        </div>
+      )}
+
+      {/* No results */}
+      {searchTerm && movies.length === 0 && !loading && (
         <p className="text-center text-muted">No movies found.</p>
       )}
     </Container>

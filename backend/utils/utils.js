@@ -44,13 +44,12 @@ function transformMovieData( details) {
   };
 }
 
-async function fetchAndTransformMoviesFromTMDB(search, filter) {
+async function fetchAndTransformMoviesFromTMDB(search, filter, page = 1) {
   const isSearchEmpty = !search || search.trim() === '';
   const tmdbUrl = isSearchEmpty ? `${TMDB_BASE_URL}/discover/movie` : `${TMDB_BASE_URL}/search/movie`;
   const tmdbParams = isSearchEmpty
-    ? { api_key: TMDB_API_KEY, sort_by: 'popularity.desc', page: 1 }
-    : { api_key: TMDB_API_KEY, query: search, page: 1 };
-
+    ? { api_key: TMDB_API_KEY, sort_by: 'popularity.desc', page }
+    : { api_key: TMDB_API_KEY, query: search, page };
 
   const response = await axios.get(tmdbUrl, { params: tmdbParams, timeout: 10000 });
   const tmdbMovies = response?.data.results || [];
@@ -60,7 +59,7 @@ async function fetchAndTransformMoviesFromTMDB(search, filter) {
     tmdbMovies.map(async (movie) => {
       try {
         const details = await fetchMovieDetails(movie.id);
-        const movieData = transformMovieData(movie, details);
+        const movieData = transformMovieData(details);
 
         if (filter && filter.startsWith('genre:')) {
           const genres = filter.split(':')[1].split(',');
@@ -71,7 +70,7 @@ async function fetchAndTransformMoviesFromTMDB(search, filter) {
 
         return movieData;
       } catch (err) {
-        console.error(`Failed to fetch details for movie ${movie.id}:`, err.message);
+        // console.error(`Failed to fetch details for movie ${movie.id}:`, err.message);
         return null;
       }
     })

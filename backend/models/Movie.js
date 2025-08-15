@@ -19,5 +19,5 @@ const movieSchema = new mongoose.Schema({
 module.exports = mongoose.model('Movie', movieSchema);
 
 
-// db.movies.dropIndex("createdAt_1")
-// db.movies.createIndex({ createdAt: 1 }, { expireAfterSeconds: 120 })
+db.movies.dropIndex("createdAt_1")
+db.movies.createIndex({ createdAt: 1 }, { expireAfterSeconds: 24 * 60 * 60 }); // 24 hours

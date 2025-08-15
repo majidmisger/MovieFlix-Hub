@@ -19,8 +19,8 @@ const retryRequest = async (fn, retries = 7, delay = 500) => {
   throw lastError; // Only throw after all retries fail
 };
 
-export const searchMovies = async (search, sort, genre) => {
-  const params = {};
+export const searchMovies = async (search, sort, genre, page = 1) => {
+  const params = { page }; // always send page
 
   if (search && search.trim()) {
     params.search = search.trim();
