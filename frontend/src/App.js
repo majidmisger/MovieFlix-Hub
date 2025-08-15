@@ -15,25 +15,32 @@ function AppWrapper() {
 
   const [theme, setTheme] = useState('light');
 
+// Toggle theme
 const toggleTheme = () => {
   const newTheme = theme === 'light' ? 'dark' : 'light';
   setTheme(newTheme);
   document.body.setAttribute('data-theme', newTheme);
 };
 
+  // On mount, check if token exists & is not expired
   useEffect(() => {
     const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
+    if (token) {
+      setIsLoggedIn(true);
+    }
   }, []);
 
   const handleNavigate = (tab) => {
     setActiveTab(tab);
-    navigate(`/${tab}`); // always navigate to exact path
+    navigate(`/${tab}`);
   };
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    handleNavigate('stats');
+  const handleLogin = (userData) => {
+    if (userData?.token) {
+      localStorage.setItem('token', userData.token); // store fresh token
+      setIsLoggedIn(true);
+      handleNavigate('stats');
+    }
   };
 
   const handleLogout = () => {
@@ -50,6 +57,7 @@ const toggleTheme = () => {
         onNavigate={handleNavigate}
         onLogin={() => handleNavigate('login')}
         onLogout={handleLogout}
+        toggleTheme={toggleTheme} // pass if you want theme button
       />
 
       <Routes>
