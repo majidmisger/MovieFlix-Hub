@@ -13,8 +13,7 @@ const movieSchema = new mongoose.Schema({
   posterUrl: { type: String }, 
   backdropUrl: { type: String }, 
   imdbLink: { type: String },
-  createdAt: { type: Date, default: Date.now, expires: 120 }, 
-  // createdAt: { type: Date, default: Date.now, expires: '24h' }, 
+  createdAt: { type: Date, default: Date.now, expires: '24h' }, 
 });
 
 module.exports = mongoose.model('Movie', movieSchema);
