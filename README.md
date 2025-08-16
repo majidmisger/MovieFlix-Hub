@@ -35,3 +35,39 @@ REACT_APP_API_BASE_URL=http://localhost:5001/api
 - Backend: Node.js, Express, MongoDB
 - Frontend: React, React Bootstrap
 - API: TMDB
+
+## Screenshots 
+
+
+Before Login - So no Analytics is accessible 
+
+
+
+
+<img width="1470" height="744" alt="Screenshot 2025-08-16 at 10 01 51 AM" src="https://github.com/user-attachments/assets/5de13661-a963-41cf-92a2-b5857b9a1b4b" />
+
+
+
+
+After Login - Analytics is Accessible 
+
+
+<img width="1443" height="871" alt="Screenshot 2025-08-16 at 10 03 28 AM" src="https://github.com/user-attachments/assets/b712c529-20f3-40be-8962-3fce12c9c51e" />
+
+
+
+Selecting a particular Movies For Details 
+
+
+<img width="1465" height="884" alt="Screenshot 2025-08-16 at 10 04 23 AM" src="https://github.com/user-attachments/assets/88c62e8a-64c4-465f-a016-8cc8bf98b8a9" />
+
+
+Analytics Page 
+
+
+
+<img width="1459" height="875" alt="Screenshot 2025-08-16 at 10 05 00 AM" src="https://github.com/user-attachments/assets/6f728991-d784-4439-a41c-e47cee877862" />
+
+<img width="1470" height="885" alt="Screenshot 2025-08-16 at 10 05 32 AM" src="https://github.com/user-attachments/assets/da9855ca-7e79-4314-8822-01e7c0a36f61" />
+
+
